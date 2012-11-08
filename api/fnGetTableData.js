@@ -19,20 +19,31 @@
 $.fn.dataTableExt.oApi.fnGetTableData = function (oSettings, oData) {
 
 	//default settings
-	var exportType = 'full';
+	var exportType = 'visible';
 	var allowedType = ['full', 'visible'];
 	var exportParts = 'all';
 	var allowedParts = ['all', 'header', 'footer', 'none'];
+	var exportSorted = false;
+	var excludeClass = 'exclude';
 
 	if (typeof oData !== 'undefined' && typeof oData === 'object') {
 
-		if (typeof oData.type !== 'undefined' && typeof oData.type === 'string' && $.inArray(oData.type, allowedType) > -1) {
-			exportType = oData.type;
-		}
+		//if (typeof oData.type !== 'undefined' && typeof oData.type === 'string' && $.inArray(oData.type, allowedType) > -1) {
+		//	exportType = oData.type;
+		//}
 
 		if (typeof oData.parts !== 'undefined' && typeof oData.parts === 'string' && $.inArray(oData.parts, allowedParts) > -1) {
 			exportParts = oData.parts;
 		}
+		
+		//if (typeof oData.sorted !== 'undefined' && typeof oData.sorted === 'boolean') {
+		//	exportSorted = oData.sorted;
+		//}
+		
+		if (typeof oData.exclude !== 'undefined' && typeof oData.exclude === 'string') {
+			excludeClass = oData.exclude;
+		}
+		
 	}
 
 	var aData = [],
@@ -65,6 +76,29 @@ $.fn.dataTableExt.oApi.fnGetTableData = function (oSettings, oData) {
 	//
 	//Body
 	//
+	
+	//test
+	if (exportSorted) {
+	var tableData = this._('tr');//sorted data
+	
+	for (j = 0, jLen = tableData.length; j < jLen; j++) {
+	
+	aRow = [];
+	var i=0;
+	$.each(tableData[j], function(key, value) {
+		if (aColumnsInc[i]) {
+				aRow.push(tableData[j][key]);
+			}
+		i++;
+	});
+
+	aData.push({
+			type: 'tbody',
+			cells: aRow
+		});
+	}
+	
+	} else {
 	for (j = 0, jLen = oSettings.aoData.length; j < jLen; j++) {
 
 		aRow = [];
@@ -84,6 +118,7 @@ $.fn.dataTableExt.oApi.fnGetTableData = function (oSettings, oData) {
 			cells: aRow
 		});
 	}
+	}
 
 	//
 	//Footer
@@ -92,7 +127,7 @@ $.fn.dataTableExt.oApi.fnGetTableData = function (oSettings, oData) {
 
 		var vLen = 0;
 		for (i = 0, iLen = oSettings.aoColumns.length; i < iLen; i++) {
-			if (oSettings.aoColumns[i].bVisible && oSettings.aoColumns[i].sClass.indexOf('last') === -1) {
+			if (oSettings.aoColumns[i].bVisible && oSettings.aoColumns[i].sClass.indexOf(excludeClass) === -1) {
 				vLen++;
 			}
 		}
